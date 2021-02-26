@@ -136,21 +136,29 @@ Complete the problem in this repository on a branch called `submission`. When
 complete, open a pull-request against the master branch in order to receive
 feedback in the form of comments.
 
-We have included a small acceptance testing binary at path `/run-test` to help
+We have included a small acceptance testing binary at path `/run-test*` to help
 you validate your solution. In order for us to be sure that your solution passes
 our acceptance tests, when run, the tests will output a code. The binary takes a
 flag `-port` for you to select which port your validation server is running on.
 The default port is `8080`.
 
-e.g.
+**Note:** Make sure you run the binary that is applicable for your machine's OS
+and architecture.
+
+e.g. If you're using a Mac with an Intel CPU.
 ```bash
-$ ./run-test -port 8081
+$ ./run-test_darwin_amd64 -port 8081
+```
+
+or Windows:
+```bash
+$ ./run-test_windows_amd64 -port 8081
 ```
 
 If the tests pass, you will see something similar to:
 
 ```bash
-$ ./run-test
+$ ./run-test_darwin_amd64
 PASS
 
 == PLEASE INCLUDE THIS WITH YOUR SUBMISSION. ==
