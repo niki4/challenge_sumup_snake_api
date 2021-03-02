@@ -3,10 +3,26 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
+
+// randRange returns, as an int, a non-negative pseudo-random number in [0,stop] excl. stop
+func randRange(stop int) int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(stop)
+}
+
+// generateFruitPosition returns a fruit initialized with random coordinates within a given "width x height" grid
+func generateFruitPosition(width, height int) fruit {
+	return fruit{
+		X: randRange(width),
+		Y: randRange(height),
+	}
+}
 
 // parseQueryParamToInt parses non-zero non-negative integer from URL query params
 func parseQueryParamToInt(qName, fullName string, qParams url.Values) (res int, err error) {
@@ -50,6 +66,7 @@ func newGameHandler(w http.ResponseWriter, r *http.Request) {
 	newGameState := state{
 		Width:  width,
 		Height: height,
+		Fruit:  generateFruitPosition(width, height),
 	}
 
 	if err = json.NewEncoder(w).Encode(newGameState); err != nil {
