@@ -15,10 +15,10 @@ type fruit struct {
 }
 
 type snake struct {
-	X    int `json:"x"`
-	Y    int `json:"y"`
-	VelX int `json:"velX"` // X velocity of the snake (-1, 0, 1)
-	VelY int `json:"velY"` // Y velocity of the snake (-1, 0, 1)
+	X    int `json:"x"`    // horizontal pos
+	Y    int `json:"y"`    // vertical pos
+	VelX int `json:"velX"` // X velocity of the snake (-1, 0, 1) where -1 is left, 1 is right
+	VelY int `json:"velY"` // Y velocity of the snake (-1, 0, 1) where -1 is up, 1 is down
 }
 
 type velocity struct {

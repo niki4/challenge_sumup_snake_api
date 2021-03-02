@@ -67,6 +67,7 @@ func newGameHandler(w http.ResponseWriter, r *http.Request) {
 		Width:  width,
 		Height: height,
 		Fruit:  generateFruitPosition(width, height),
+		Snake:  snake{VelX: 1}, // snake start at position (0, 0), with a velocity of (1, 0) so moving to the right
 	}
 
 	if err = json.NewEncoder(w).Encode(newGameState); err != nil {
