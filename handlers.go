@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -64,6 +65,7 @@ func newGameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newGameState := state{
+		GameID: uuid.NewString(),
 		Width:  width,
 		Height: height,
 		Fruit:  generateFruitPosition(width, height),
