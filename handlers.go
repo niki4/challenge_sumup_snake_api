@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -84,5 +85,45 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	_, _ = fmt.Fprintln(w, "validateGameHandler response OK")
+
+	gs := new(gameStates)
+	if err := json.NewDecoder(r.Body).Decode(gs); err != nil {
+		http.Error(w, "error on decoding JSON request:"+err.Error(), http.StatusBadRequest)
+	}
+
+	// Check if JSON has all mandatory / valid fields
+	// If there some non-valid field(s), return "400: Invalid request."
+	validationErrors := validateState(gs)
+	if len(validationErrors) > 0 {
+		http.Error(w, strings.Join(validationErrors, "\n"), http.StatusBadRequest)
+		return
+	}
+
+	res, _ := json.Marshal(gs)
+	_, _ = fmt.Fprintln(w, "gs JSON:\n", string(res))
+}
+
+// validateState validates state for incorrect / missed data
+func validateState(gs *gameStates) (validationErrors []string) {
+	if gs.GameID == "" {
+		validationErrors = append(validationErrors, "GameID not specified.")
+	}
+
+	if gs.Width <= 0 || gs.Height <= 0 {
+		validationErrors = append(validationErrors, "Game board has incorrect size.")
+	} else if gs.Fruit.X <= 0 || gs.Fruit.X > gs.Width ||
+		gs.Fruit.Y <= 0 || gs.Fruit.Y > gs.Height {
+		validationErrors = append(validationErrors, "Fruit has incorrect position.")
+	}
+
+	if gs.Snake.X != 0 || gs.Snake.Y != 0 || gs.Snake.VelX != 1 || gs.Snake.VelY != 0 {
+		validationErrors = append(validationErrors, "Snake has incorrect initial position / velocity.")
+	}
+	if gs.Score < 0 {
+		validationErrors = append(validationErrors, "Score cannot be negative number.")
+	}
+	if len(gs.Ticks) == 0 {
+		validationErrors = append(validationErrors, "Ticks are not specified.")
+	}
+	return
 }
