@@ -99,8 +99,41 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, _ := json.Marshal(gs)
-	_, _ = fmt.Fprintln(w, "gs JSON:\n", string(res))
+	// Iterate over ticks starting from snake position (X, Y)
+	// Verify if all steps leading to the fruit (if so, update score and return state as JSON, otherwise return error)
+	prevX, prevY := gs.Snake.X, gs.Snake.Y
+	prevVelX, prevVelY := -2, -2 // init with non-possible values do indicate we have no prev velocity before 1st move
+	for _, tick := range gs.Ticks {
+		currX, currY := prevX+tick.VelX, prevY+tick.VelY // current position
+		if currX == gs.Fruit.X && currY == gs.Fruit.Y {  // return 200: Valid state & ticks
+			gs.Score++
+			// TODO: generate a new (random) position for the fruit struct
+			// TODO: Init snake struct as well
+			if err := json.NewEncoder(w).Encode(gs); err != nil {
+				http.Error(w, "error on encoding JSON response: "+err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+		// check if snake out of game board borders
+		if currX < 0 || currX >= gs.Width || currY < 0 || currY >= gs.Height {
+			http.Error(w, "Snake went out of bounds.", http.StatusTeapot) // return 418
+			return
+		}
+		// check if snake made an invalid move (e.g., immediate 180-degree turn not allowed)
+		if (-prevVelX == tick.VelX && tick.VelX != 0) ||
+			(-prevVelY == tick.VelY && tick.VelY != 0) ||
+			(tick.VelX == tick.VelY) {
+			http.Error(w, "Snake made an invalid move.", http.StatusTeapot) // return 418
+			return
+		}
+
+		// update prev before the next iteration
+		prevX, prevY = currX, currY
+		prevVelX, prevVelY = tick.VelX, tick.VelY
+	}
+
+	http.Error(w, "Fruit not found - ticks do not lead the snake to the fruit position.", http.StatusNotFound)
+	return
 }
 
 // validateState validates state for incorrect / missed data
