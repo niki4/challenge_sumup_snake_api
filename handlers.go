@@ -145,8 +145,9 @@ func validateState(gs *gameStates) (validationErrors []string) {
 
 	if gs.Width <= 0 || gs.Height <= 0 {
 		validationErrors = append(validationErrors, "Game board has incorrect size.")
-	} else if gs.Fruit.X <= 0 || gs.Fruit.X > gs.Width ||
-		gs.Fruit.Y <= 0 || gs.Fruit.Y > gs.Height {
+	} else if gs.Fruit.X < 0 || gs.Fruit.X >= gs.Width ||
+		gs.Fruit.Y < 0 || gs.Fruit.Y >= gs.Height ||
+		(gs.Fruit.X == gs.Snake.X && gs.Fruit.Y == gs.Snake.Y) {
 		validationErrors = append(validationErrors, "Fruit has incorrect position.")
 	}
 
