@@ -103,17 +103,12 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 	// Verify if all steps leading to the fruit (if so, update score and return state as JSON, otherwise return error)
 	prevX, prevY := gs.Snake.X, gs.Snake.Y
 	prevVelX, prevVelY := -2, -2 // init with non-possible values do indicate we have no prev velocity before 1st move
+	fruitFound := false
+
 	for _, tick := range gs.Ticks {
 		currX, currY := prevX+tick.VelX, prevY+tick.VelY // current position
-		if currX == gs.Fruit.X && currY == gs.Fruit.Y {  // return 200: Valid state & ticks
-			gs.Score++
-			gs.Fruit = generateFruitPosition(gs.Width, gs.Height)
-			gs.Snake = snake{VelX: 1}
-			gs.Ticks = []velocity{}
-			if err := json.NewEncoder(w).Encode(gs); err != nil {
-				http.Error(w, "error on encoding JSON response: "+err.Error(), http.StatusInternalServerError)
-			}
-			return
+		if currX == gs.Fruit.X && currY == gs.Fruit.Y {
+			fruitFound = true
 		}
 		// check if snake out of game board borders
 		if currX < 0 || currX >= gs.Width || currY < 0 || currY >= gs.Height {
@@ -131,6 +126,21 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 		// update prev before the next iteration
 		prevX, prevY = currX, currY
 		prevVelX, prevVelY = tick.VelX, tick.VelY
+	}
+
+	if fruitFound { // return 200: Valid state & ticks
+		newState := state{
+			GameID: gs.GameID,
+			Width:  gs.Width,
+			Height: gs.Height,
+			Score:  gs.Score + 1,
+			Fruit:  generateFruitPosition(gs.Width, gs.Height),
+			Snake:  snake{VelX: 1},
+		}
+		if err := json.NewEncoder(w).Encode(newState); err != nil {
+			http.Error(w, "error on encoding JSON response: "+err.Error(), http.StatusInternalServerError)
+		}
+		return
 	}
 
 	http.Error(w, "Fruit not found - ticks do not lead the snake to the fruit position.", http.StatusNotFound)
