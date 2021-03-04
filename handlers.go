@@ -129,12 +129,16 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if fruitFound { // return 200: Valid state & ticks
+		newFruit := gs.Fruit
+		for newFruit.X == gs.Fruit.X && newFruit.Y == gs.Fruit.Y {
+			newFruit = generateFruitPosition(gs.Width, gs.Height)
+		}
 		newState := state{
 			GameID: gs.GameID,
 			Width:  gs.Width,
 			Height: gs.Height,
 			Score:  gs.Score + 1,
-			Fruit:  generateFruitPosition(gs.Width, gs.Height),
+			Fruit:  newFruit,
 			Snake:  snake{X: gs.Fruit.X, Y: gs.Fruit.Y, VelX: 0, VelY: 1},
 		}
 		if err := json.NewEncoder(w).Encode(newState); err != nil {
@@ -161,8 +165,14 @@ func validateState(gs *gameStates) (validationErrors []string) {
 		validationErrors = append(validationErrors, "Fruit has incorrect position.")
 	}
 
-	if gs.Snake.X != 0 || gs.Snake.Y != 0 || gs.Snake.VelX != 1 || gs.Snake.VelY != 0 {
-		validationErrors = append(validationErrors, "Snake has incorrect initial position / velocity.")
+	if gs.Snake.X < 0 || gs.Snake.X >= gs.Width ||
+		gs.Snake.Y < 0 || gs.Snake.Y >= gs.Width {
+		validationErrors = append(validationErrors, "Snake has incorrect initial position ")
+	}
+	if gs.Snake.VelX < -1 || gs.Snake.VelX > 1 ||
+		gs.Snake.VelY < -1 || gs.Snake.VelY > 1 ||
+		gs.Snake.VelX == gs.Snake.VelY {
+		validationErrors = append(validationErrors, "Snake has incorrect initial velocity")
 	}
 	if gs.Score < 0 {
 		validationErrors = append(validationErrors, "Score cannot be negative number.")
