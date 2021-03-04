@@ -107,7 +107,7 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 		currX, currY := prevX+tick.VelX, prevY+tick.VelY // current position
 		if currX == gs.Fruit.X && currY == gs.Fruit.Y {  // return 200: Valid state & ticks
 			gs.Score++
-			// TODO: generate a new (random) position for the fruit struct
+			gs.Fruit = generateFruitPosition(gs.Width, gs.Height)
 			// TODO: Init snake struct as well
 			if err := json.NewEncoder(w).Encode(gs); err != nil {
 				http.Error(w, "error on encoding JSON response: "+err.Error(), http.StatusInternalServerError)
