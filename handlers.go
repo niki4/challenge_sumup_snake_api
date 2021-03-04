@@ -135,7 +135,7 @@ func validateGameHandler(w http.ResponseWriter, r *http.Request) {
 			Height: gs.Height,
 			Score:  gs.Score + 1,
 			Fruit:  generateFruitPosition(gs.Width, gs.Height),
-			Snake:  snake{VelX: 1},
+			Snake:  snake{X: gs.Fruit.X, Y: gs.Fruit.Y, VelX: 0, VelY: 1},
 		}
 		if err := json.NewEncoder(w).Encode(newState); err != nil {
 			http.Error(w, "error on encoding JSON response: "+err.Error(), http.StatusInternalServerError)
